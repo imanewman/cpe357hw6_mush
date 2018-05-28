@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define MAX_CMD_LEN 512 /*max command line length*/
 #define MAX_CMD_PIPES 10 /*max commands in a pipeline*/
@@ -84,7 +85,7 @@ void printStage(cmdFile *cf);
 /********************* Main Funcs *********************/
 /*******************************************************/
 
-/*closes unused pipes basedon stage
+/*closes unused pipes based on stage
   if end is 1, closes pipes used by that stage*/
 void closePipes(int **pipes, int stage, int end);
 

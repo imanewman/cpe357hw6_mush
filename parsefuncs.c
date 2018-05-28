@@ -200,7 +200,7 @@ void initCmdFile(cmdFile *cf) {
 	cf->argc = 0;
 
 	for (i = 0; i < MAX_CMD_ARGS; i++)
-		cf->args[i] = 0;
+		cf->args[i] = NULL;
 
 	cf->inStage = -1;
 	cf->outStage = -1;

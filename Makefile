@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -g
-OBJS = mush.o parsefuncs.o
-TOBJS = tests.o mush.o parsefuncs.o
+OBJS = mush.o parsefuncs.o mainfuncs.o
+TOBJS = tests.o mush.o parsefuncs.o mainfuncs.o
 DEPS = mush.h
 NAME = mush
 UNIX4 = tnewma03@unix4.csc.calpoly.edu
@@ -15,6 +15,9 @@ mush.o : mush.c mush.h
 
 parsefuncs.o : parsefuncs.c mush.h
 	$(CC) $(CFLAGS) -c parsefuncs.c
+
+mainfuncs.o : mainfuncs.c mush.h
+	$(CC) $(CFLAGS) -c mainfuncs.c
 
 tests.o : tests.c mush.h
 	$(CC) $(CFLAGS) -c tests.c

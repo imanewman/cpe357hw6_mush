@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
 	input *in = NULL;
 	FILE *infile = NULL;
 	int pipes[MAX_CMD_PIPES][2];
+	int repeat = 1;
 
 	/*check args*/
 	if (argc == 1)
@@ -22,35 +23,41 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-
-	/*TODO: loop until EOF, and do more than just piping*/
-	while (1) {
+	do {
 		str[MAX_CMD_LEN - 1] = '\0';
 
 		printf("8-P ");
 		
-		if (!(fgets(str, MAX_CMD_LEN, stdin))) {
-			perror("no input given\n");
-			return 1;
+		if (!(fgets(str, MAX_CMD_LEN, stdin))) { /*check if EOF reached*/
+			repeat = 0;
+		} else {
+			if (str[MAX_CMD_LEN - 1] != '\0') { /*check if cmd was to long*/
+				perror("command too long\n");
+				return 1;
+			}
+
+			in = initInput(str);
+
+			if (strcmp("cd", in->words[0])) { /*make pipes if not cd*/
+				fs = parseInput(in);
+
+				execProcesses(fs, pipes);
+			} else { /*else cd to given dir*/
+				if (in->words[1])
+					changeDirectory(in->words[1]);
+				else 
+					perror("missing file name\n");
+			}
+
+			clearInput(in);
+			clearFileSet(fs);
+			activeProcesses = 0;
 		}
-
-		if (str[MAX_CMD_LEN - 1] != '\0') {
-			perror("command too long\n");
-			return 1;
-		}
-
-		in = initInput(str);
-
-		fs = parseInput(in);
-
-		printPipeline(fs);
-	}
-
-
-
+	} while (repeat);
 
 	free(fs);
 	free(in);
+	fclose(infile);
 
 	return 0;
 }

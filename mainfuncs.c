@@ -18,3 +18,18 @@ void closePipes(int **pipes, int stage, int end) {
 	if ((!end && stage != max) || (end && stage == max))
 		close(pipes[max][RD_END]);
 }
+
+/*forks and executes the given pipeline of processes*/
+void execProcesses(fileSet *fs, int **pipes) {
+
+} /*make sure to increment active processes for sigint handler*/
+
+/*changes the parent direcctory to given dname*/
+void changeDirectory(char *dname) {
+
+}
+
+/*handles sigint*/
+void handler(int signum) {
+
+}
