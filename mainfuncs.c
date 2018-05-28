@@ -27,13 +27,14 @@ void closePipes(int **pipes, int stage, int end) {
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, int **pipes) {
 	int i;
+	int error = 0; /*set to 1 if theres a probem and running processes need to be killed*/
 
 	for (i = 0; i < fs->size; i++) {
-		closePipes(pipes, i, 0);
-
 		/*TODO: exec each process / check for errors*/
+	}
 
-		closePipes(pipes, i, 1); /*only closes if failure to exec*/
+	if (error) {
+		/*TODO: kill each aready running process if necessary*/
 	}
 } /*make sure to increment active processes for sigint handler*/
 

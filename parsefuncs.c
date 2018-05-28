@@ -144,23 +144,19 @@ fileSet *makeFileSet(input *in) {
 				break;
 			case '>':
 				cf->outName = in->words[++i];
-				cf->startLen += 2;
 				break;
 			case '<':
 				cf->inName = in->words[++i];
-				cf->startLen += 2;
 				break;
 			default:
 				if (!(cf)) { /*if file isnt initialized*/
 					cf = fs->files + curCmd;
 					cf->name = in->words[i];
 					cf->stage = curCmd;
-					cf->start = in->words + i;
 					fs->size++;
 				}
 				
 				cf->args[cf->argc++] = in->words[i];
-				cf->startLen++;
 		}
 	}
 
@@ -183,8 +179,8 @@ void clearFileSet(fileSet *fs) {
 fileSet *parseInput(input *in) {
 	if ((inputErrorCheck(in)))
 		return NULL;
-		
-	return makeFileSet(in);
+	else	
+		return makeFileSet(in);
 }
 
 /********************* CmdFile *********************/
@@ -195,8 +191,7 @@ void initCmdFile(cmdFile *cf) {
 
 	cf->name = NULL;
 	cf->stage = -1;
-	cf->start = NULL;
-	cf->startLen = 0;
+	cf->pid = 0;
 	cf->argc = 0;
 
 	for (i = 0; i < MAX_CMD_ARGS; i++)
@@ -206,49 +201,4 @@ void initCmdFile(cmdFile *cf) {
 	cf->outStage = -1;
 	cf->inName = NULL;
 	cf->outName = NULL;
-}
-
-/********************* Printing *********************/
-
-/*prints the stages of the pipeline*/
-void printPipeline(fileSet *fs) {
-	int i;
-
-	for (i = 0; i < fs->size; i++)
-		printStage(fs->files + i);
-}
-
-/*prints one stage of the pipeline*/
-void printStage(cmdFile *cf) {
-	int i;
-
-	printf("\n--------\nStage %d: \"%s", cf->stage, cf->start[0]);
-
-	for (i = 1; i < cf->startLen; i++) 
-		printf(" %s", cf->start[i]);
-
-	printf("\"\n--------\n");
-
-	if (cf->inStage != -1)
-		printf("input: pipe from stage %d\n", cf->inStage);
-	else if (cf->inName)
-		printf("input: %s\n", cf->inName);
-	else
-		printf("input: original stdin\n");
-
-	if (cf->outStage != -1)
-		printf("output: pipe to stage %d\n", cf->outStage);
-	else if (cf->outName)
-		printf("output: %s\n", cf->outName);
-	else 
-		printf("output: original stdout\n");
-
-	printf("argc: %d\nargv: ", cf->argc);
-
-	if (cf->argc) {
-		for (i = 0; i < cf->argc - 1; i++)
-			printf("\"%s\",", cf->args[i]);
-
-		printf("\"%s\"\n", cf->args[cf->argc - 1]);
-	} else printf("\n");
 }

@@ -19,8 +19,7 @@ static int processes = 0;
 typedef struct cmdFile {
 	char *name;
 	short stage;
-	char **start; /*used to print given args with in and out in right order*/
-	short startLen; /*count of args including in and outs*/
+	pid_t pid;
 	char *args[MAX_CMD_ARGS]; /*NULL if not set*/
 	short argc;
 	short inStage; /*-1 if not set*/
@@ -76,14 +75,6 @@ fileSet *parseInput(input *in);
 
 /*inits a cmdFile to base values*/
 void initCmdFile(cmdFile *cf);
-
-/********************* Printing *********************/
-
-/*prints the stages of the pipeline*/
-void printPipeline(fileSet *fs);
-
-/*prints one stage of the pipeline*/
-void printStage(cmdFile *cf); 
 
 /*******************************************************/
 /********************* Main Funcs *********************/
