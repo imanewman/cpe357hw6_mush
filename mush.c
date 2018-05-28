@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	/*set up sigint signal handling*/
 	memset(&sa, 0, sizeof(sa));
 	sigfillset(&sa.sa_mask);
 	sigdelset(&sa.sa_mask, SIGINT);
