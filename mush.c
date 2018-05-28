@@ -47,15 +47,13 @@ int main(int argc, char *argv[]) {
 				fs = parseInput(in);
 
 				execProcesses(fs, pipes);
+
+				clearFileSet(fs);
 			} else { /*else cd to given dir*/
-				if (in->words[1])
-					changeDirectory(in->words[1]);
-				else 
-					perror("missing file name\n");
+				changeDirectory(in);
 			}
 
 			clearInput(in);
-			clearFileSet(fs);
 			processes = 0;
 		}
 	} while (repeat);

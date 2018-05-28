@@ -97,7 +97,7 @@ void closePipes(int **pipes, int stage, int end);
 void execProcesses(fileSet *fs, int **pipes);
 
 /*changes the parent direcctory to given dname*/
-void changeDirectory(char *dname);
+void changeDirectory(input *in);
 
 /*handles sigint*/
 void handler(int signum);

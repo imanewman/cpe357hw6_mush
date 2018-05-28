@@ -25,14 +25,19 @@ void execProcesses(fileSet *fs, int **pipes) {
 } /*make sure to increment active processes for sigint handler*/
 
 /*changes the parent direcctory to given dname*/
-void changeDirectory(char *dname) {
-
+void changeDirectory(input *in) {
+	if (in->words[1]) {
+		if (chdir(in->words[1]) < 0)
+			fprintf(stderr, "%s: cant change to directory\n", in->words[1]);
+	} else {
+		perror("missing directory name\n");
+	}
 }
 
 /*handles sigint*/
 void handler(int signum) {
 	int i;
-	
+
 	for (i = 0; i < processes; i++)
 		waitpid(-1, NULL, 0);
 }
