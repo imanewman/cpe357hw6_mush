@@ -17,11 +17,24 @@ void closePipes(int **pipes, int stage, int end) {
 
 	if ((!end && stage != max) || (end && stage == max))
 		close(pipes[max][RD_END]);
+
+	if (!end) {
+		close(pipes[0][RD_END]);
+		close(pipes[max][WR_END]);
+	}
 }
 
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, int **pipes) {
+	int i;
 
+	for (i = 0; i < fs->size; i++) {
+		closePipes(pipes, i, 0);
+
+		/*TODO: exec each process / check for errors*/
+
+		closePipes(pipes, i, 1); /*only closes if failure to exec*/
+	}
 } /*make sure to increment active processes for sigint handler*/
 
 /*changes the parent direcctory to given dname*/
