@@ -93,8 +93,6 @@ void printStage(cmdFile *cf);
   if end is 1, closes pipes used by that stage*/
 void closePipes(int **pipes, int stage, int end);
 
-/*TODO: still need to write these funcs below*/
-
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, int **pipes);
 
@@ -103,8 +101,3 @@ void changeDirectory(char *dname);
 
 /*handles sigint*/
 void handler(int signum);
-
-/*
-TODO:
-may need to change the cmdFile data a bit to adapt to new prject/ remove uneeded parts 
-*/

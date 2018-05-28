@@ -32,7 +32,7 @@ void changeDirectory(char *dname) {
 /*handles sigint*/
 void handler(int signum) {
 	int i;
-
+	
 	for (i = 0; i < processes; i++)
 		waitpid(-1, NULL, 0);
 }

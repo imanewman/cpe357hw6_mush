@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	/*TODO: set up sigint handler*/
 	memset(&sa, 0, sizeof(sa));
 	sigfillset(&sa.sa_mask);
 	sigdelset(&sa.sa_mask, SIGINT);
 	sa.sa_handler = &handler;
+	sigaction(SIGINT, &sa, NULL);
 
 	do {
 		str[MAX_CMD_LEN - 1] = '\0';
