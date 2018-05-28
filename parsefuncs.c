@@ -178,11 +178,9 @@ void clearFileSet(fileSet *fs) {
 	}
 }
 
-/*parses input string, checks for errors, and returns fileset pointer
+/*checks for errors in input, and returns fileset pointer
   returns null if errors*/
-fileSet *parseInput(input *in, char *str) {
-	in = initInput(str);
-
+fileSet *parseInput(input *in) {
 	if ((inputErrorCheck(in)))
 		return NULL;
 		

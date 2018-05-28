@@ -63,9 +63,9 @@ fileSet *makeFileSet(input *in);
 /*clears the fileset data*/
 void clearFileSet(fileSet *fs);
 
-/*parses input string, checks for errors, and returns fileset pointer
+/*checks for errors in input, and returns fileset pointer
   returns null if errors*/
-fileSet *parseInput(input *in, char *str);
+fileSet *parseInput(input *in);
 
 /********************* CmdFile *********************/
 

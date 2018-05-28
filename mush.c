@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	while (1) {
 		str[MAX_CMD_LEN - 1] = '\0';
 
-		printf("line: ");
+		printf("8-P ");
 		
 		if (!(fgets(str, MAX_CMD_LEN, stdin))) {
 			perror("no input given\n");
@@ -39,7 +39,9 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		fs = parseInput(in, str);
+		in = initInput(str);
+
+		fs = parseInput(in);
 
 		printPipeline(fs);
 	}
