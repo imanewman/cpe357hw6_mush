@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	/*TODO: set up sigint handler*/
+
 	do {
 		str[MAX_CMD_LEN - 1] = '\0';
 
