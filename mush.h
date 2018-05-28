@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #define MAX_CMD_LEN 512 /*max command line length*/
 #define MAX_CMD_PIPES 10 /*max commands in a pipeline*/
@@ -9,6 +11,8 @@
 
 #define RD_END 0
 #define WR_END 1
+
+static int processes = 0;
 
 /********************* Structures *********************/
 

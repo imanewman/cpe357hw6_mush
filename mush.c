@@ -1,7 +1,5 @@
 #include "mush.h"
 
-int activeProcesses = 0;
-
 int main(int argc, char *argv[]) {
 	char str[MAX_CMD_LEN];
 	fileSet *fs = NULL;
@@ -9,6 +7,7 @@ int main(int argc, char *argv[]) {
 	FILE *infile = NULL;
 	int pipes[MAX_CMD_PIPES][2];
 	int repeat = 1;
+	struct sigaction sa;
 
 	/*check args*/
 	if (argc == 1)
@@ -24,6 +23,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	/*TODO: set up sigint handler*/
+	memset(&sa, 0, sizeof(sa));
+	sigfillset(&sa.sa_mask);
+	sigdelset(&sa.sa_mask, SIGINT);
+	sa.sa_handler = &handler;
 
 	do {
 		str[MAX_CMD_LEN - 1] = '\0';
@@ -53,7 +56,7 @@ int main(int argc, char *argv[]) {
 
 			clearInput(in);
 			clearFileSet(fs);
-			activeProcesses = 0;
+			processes = 0;
 		}
 	} while (repeat);
 
