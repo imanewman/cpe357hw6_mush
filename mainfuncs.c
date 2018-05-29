@@ -53,10 +53,10 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	cmdFile *cf;
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
+	openPipes(pa);
+	
 	/*******TODO: this isnt fully working, i just started on it. theres some piping issues*/
 	for (i = 0; i < fs->size; i++) {
-		openPipes(pa);
-
 		cf = fs->files + i;
 
 		if (!(cf->pid = fork())) { /*in child*/
@@ -99,9 +99,6 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			exit(1);
 		} else { /*in parent*/
 			processes++;
-
-			closePipes(pa, 0, 0);
-			closePipes(pa, 0, 1);
 		}
 	}
 
@@ -111,6 +108,10 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 		for (i = 0; i < processes; i++)
 			waitpid(-1, NULL, 0);
 	}
+
+
+	closePipes(pa, 0, 0);
+	closePipes(pa, 0, 1);
 }
 
 /*changes the parent direcctory to given dname*/
