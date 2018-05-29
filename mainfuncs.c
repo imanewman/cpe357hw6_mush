@@ -113,6 +113,8 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 
 	closePipes(pa, 0, 0);
 	closePipes(pa, 0, 1);
+
+	fflush(stdout);
 }
 
 /*changes the parent direcctory to given dname*/
