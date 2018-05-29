@@ -54,7 +54,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
 	openPipes(pa);
-	
+
 	/*******TODO: this isnt fully working, i just started on it. theres some piping issues*/
 	for (i = 0; i < fs->size; i++) {
 		cf = fs->files + i;
@@ -79,23 +79,22 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 				dup2(pa->pipes[i][WR_END], STDOUT_FILENO);
 			else if (cf->outName) {
 				if ((fdout = open(cf->outName, O_WRONLY | O_CREAT | O_TRUNC, mode)) < 0) {
-					fprintf(stderr, "%s: cant open \n", cf->inName);
+					fprintf(stderr, "%s: cant open \n", cf->outName);
 					error = 1;
 				} else {
 					dup2(fdout, STDOUT_FILENO);
 				}
 			}
 
+			closePipes(pa, i, 1);
+			close(fdin);
+			close(fdout);
+
 			if (!(error)) /*exec if no errors thus far*/
 				execvp(cf->name, cf->args);
 
 			error = 1;
 			fprintf(stderr, "%s: cant exec \n", cf->name);
-
-			closePipes(pa, i, 1);
-			close(fdin);
-			close(fdout);
-
 			exit(1);
 		} else { /*in parent*/
 			processes++;
@@ -108,7 +107,6 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 		for (i = 0; i < processes; i++)
 			waitpid(-1, NULL, 0);
 	}
-
 
 	closePipes(pa, 0, 0);
 	closePipes(pa, 0, 1);
