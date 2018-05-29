@@ -1,5 +1,7 @@
 #include "mush.h"
 
+/********************* Pipes *********************/
+
 /*initializes a pipeArr object*/
 void initPipeArr(pipeArr *pa) {
 	pa->pipes[0] = pa->pipe_0;
@@ -42,6 +44,8 @@ void closePipes(pipeArr *pa, int stage, int end) {
 		close(pa->pipes[max - 1][RD_END]);
 }
 
+/********************* main functions *********************/
+
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, pipeArr *pa) {
 	int i, fdin, fdout;
@@ -49,7 +53,8 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	cmdFile *cf;
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
-	for (i = 0; i < fs->size; i++) { /******TODO: this isnt fully working, i just started it*****/
+	/*******TODO: this isnt fully working, i just started on it. theres some piping issues*/
+	for (i = 0; i < fs->size; i++) {
 		openPipes(pa);
 
 		cf = fs->files + i;
@@ -117,6 +122,8 @@ void changeDirectory(input *in) {
 		perror("missing directory name\n");
 	}
 }
+
+/********************* Signal Handling *********************/
 
 /*handles sigint*/
 void handler(int signum) {

@@ -91,8 +91,10 @@ fileSet *parseInput(input *in);
 void initCmdFile(cmdFile *cf);
 
 /*******************************************************/
-/********************* Main Funcs *********************/
+/********************* Main Funcs **********************/
 /*******************************************************/
+
+/********************* Pipes *********************/
 
 /*initializes a pipeArr object*/
 void initPipeArr(pipeArr *pa);
@@ -104,11 +106,15 @@ void openPipes(pipeArr *pa);
   if end is 1, closes pipes used by that stage*/
 void closePipes(pipeArr *pa, int stage, int end);
 
+/********************* main functions *********************/
+
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, pipeArr *pa);
 
 /*changes the parent direcctory to given dname*/
 void changeDirectory(input *in);
+
+/********************* Signal Handling *********************/
 
 /*handles sigint*/
 void handler(int signum);
