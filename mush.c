@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
 	fileSet *fs = NULL;
 	input *in = NULL;
 	FILE *infile = NULL;
-	int pipes[MAX_CMD_PIPES - 1][2];
+	pipeArr pa;
 	int repeat = 1;
 	struct sigaction sa;
 
@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 		perror("usage: mush [file]\n");
 		return 1;
 	}
+
+	initPipeArr(&pa);
 
 	/*set up sigint signal handling*/
 	memset(&sa, 0, sizeof(sa));
@@ -46,7 +48,7 @@ int main(int argc, char *argv[]) {
 
 			if (strcmp("cd", in->words[0])) { /*make pipes if not cd*/
 				if ((fs = parseInput(in))) {
-					execProcesses(fs, pipes);
+					execProcesses(fs, &pa);
 
 					clearFileSet(fs);
 				}

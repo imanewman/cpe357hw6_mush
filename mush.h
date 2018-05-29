@@ -39,6 +39,19 @@ typedef struct input {
 	int size;
 } input;
 
+typedef struct pipeArr {
+	int *pipes[9];
+	int pipe_0[2];
+	int pipe_1[2];
+	int pipe_2[2];
+	int pipe_3[2];
+	int pipe_4[2];
+	int pipe_5[2];
+	int pipe_6[2];
+	int pipe_7[2];
+	int pipe_8[2];
+} pipeArr;
+
 /*******************************************************/
 /********************* Parse Funcs *********************/
 /*******************************************************/
@@ -81,15 +94,18 @@ void initCmdFile(cmdFile *cf);
 /********************* Main Funcs *********************/
 /*******************************************************/
 
+/*initializes a pipeArr object*/
+void initPipeArr(pipeArr *pa);
+
 /*opens all possible pipes*/
-void openPipes(int **pipes);
+void openPipes(pipeArr *pa);
 
 /*closes unused pipes based on stage
   if end is 1, closes pipes used by that stage*/
-void closePipes(int **pipes, int stage, int end);
+void closePipes(pipeArr *pa, int stage, int end);
 
 /*forks and executes the given pipeline of processes*/
-void execProcesses(fileSet *fs, int **pipes);
+void execProcesses(fileSet *fs, pipeArr *pa);
 
 /*changes the parent direcctory to given dname*/
 void changeDirectory(input *in);
