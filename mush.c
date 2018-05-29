@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
 			in = initInput(str);
 
 			if (strcmp("cd", in->words[0])) { /*make pipes if not cd*/
-				fs = parseInput(in);
+				if ((fs = parseInput(in))) {
+					execProcesses(fs, pipes);
 
-				execProcesses(fs, pipes);
-
-				clearFileSet(fs);
+					clearFileSet(fs);
+				}
 			} else { /*else cd to given dir*/
 				changeDirectory(in);
 			}
