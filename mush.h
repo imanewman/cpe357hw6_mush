@@ -81,6 +81,9 @@ void initCmdFile(cmdFile *cf);
 /********************* Main Funcs *********************/
 /*******************************************************/
 
+/*opens all possible pipes*/
+void openPipes(int **pipes);
+
 /*closes unused pipes based on stage
   if end is 1, closes pipes used by that stage*/
 void closePipes(int **pipes, int stage, int end);
