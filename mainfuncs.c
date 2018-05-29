@@ -1,5 +1,13 @@
 #include "mush.h"
 
+/*opens all possible pipes*/
+void openPipes(int **pipes) {
+	int i;
+
+	for (i = 0; i < MAX_CMD_PIPES; i++)
+		pipe(pipes[i]);
+}
+
 /*closes unused pipes basedon stage
   if end is 1, closes pipes used by that stage*/
 void closePipes(int **pipes, int stage, int end) {
