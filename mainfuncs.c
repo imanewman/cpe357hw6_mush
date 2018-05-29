@@ -55,7 +55,6 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 
 	openPipes(pa);
 
-	/*******TODO: this isnt fully working, i just started on it. theres some piping issues*/
 	for (i = 0; i < fs->size; i++) {
 		cf = fs->files + i;
 
@@ -68,9 +67,12 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			else if (cf->inName) {
 				if ((fdin = open(cf->inName, O_RDONLY)) < 0) {
 					fprintf(stderr, "%s: cant open \n", cf->inName);
+
 					error = 1;
 				} else {
 					dup2(fdin, STDIN_FILENO);
+
+					close(fdin);
 				}
 			}
 
@@ -80,15 +82,16 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			else if (cf->outName) {
 				if ((fdout = open(cf->outName, O_WRONLY | O_CREAT | O_TRUNC, mode)) < 0) {
 					fprintf(stderr, "%s: cant open \n", cf->outName);
+
 					error = 1;
 				} else {
 					dup2(fdout, STDOUT_FILENO);
+
+					close(fdout);
 				}
 			}
 
 			closePipes(pa, i, 1);
-			close(fdin);
-			close(fdout);
 
 			if (!(error)) /*exec if no errors thus far*/
 				execvp(cf->name, cf->args);
