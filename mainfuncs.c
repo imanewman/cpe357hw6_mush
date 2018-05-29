@@ -49,7 +49,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	cmdFile *cf;
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
-	for (i = 0; i < fs->size; i++) {
+	for (i = 0; i < fs->size; i++) { /******TODO: this isnt fully working, i just started it*****/
 		openPipes(pa);
 
 		cf = fs->files + i;
