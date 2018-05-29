@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
 	fileSet *fs = NULL;
 	input *in = NULL;
 	FILE *infile = NULL;
-	int pipes[MAX_CMD_PIPES][2];
+	int pipes[MAX_CMD_PIPES - 1][2];
 	int repeat = 1;
 	struct sigaction sa;
 
