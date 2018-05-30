@@ -118,3 +118,8 @@ void changeDirectory(input *in);
 
 /*handles sigint*/
 void handler(int signum);
+
+/********************* Error Handling *********************/
+
+/*kills children*/
+int killChildren(int *pids);

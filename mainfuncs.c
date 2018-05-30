@@ -44,14 +44,26 @@ void closePipes(pipeArr *pa, int stage, int end) {
 		close(pa->pipes[max - 1][RD_END]);
 }
 
+/*simply close all the pipes*/
+void closeAllPipes(pipeArr *pa){
+	int i, max = MAX_CMD_PIPES - 2;
+	for(i=0; i < max; i++){
+		close(pa->pipes[i][RD_END]);
+		close(pa->pipes[i][WR_END]);
+	}
+}
+
 /********************* main functions *********************/
 
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, pipeArr *pa) {
-	int i, fdin, fdout;
+	int i, fdin, fdout, childStatus;
 	int error = 0; /*set to 1 if theres a probem and running processes need to be killed*/
 	cmdFile *cf;
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+
+	//Need to keep track of child pids to be able to kill them
+	int pids[MAX_CHILDREN];
 
 	openPipes(pa);
 
@@ -59,7 +71,8 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 		cf = fs->files + i;
 
 		if (!(cf->pid = fork())) { /*in child*/
-			closePipes(pa, i, 0); /*close unneeded pipes*/
+			/*closePipes(pa, i, 0);*/ /*close unneeded pipes*/
+												/*avoid for now*/
 
 			/*set up file input*/
 			if (cf->inStage != -1)
@@ -91,7 +104,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 				}
 			}
 
-			closePipes(pa, i, 1);
+			closeAllPipes(pa);
 
 			if (!(error)) /*exec if no errors thus far*/
 				execvp(cf->name, cf->args);
@@ -107,12 +120,16 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	if (error) {
 		/*TODO: kill each aready running process if necessary*/
 	} else {
-		for (i = 0; i < processes; i++)
-			waitpid(-1, NULL, 0);
+		for (i = 0; i < processes; i++){
+			childStatus = wait(NULL);
+			if(WIFEXITED(childStatus)){
+				/*Check if child exited normally*/
+				/*If there was an error, kill the others*/
+			}
+		}
 	}
 
-	closePipes(pa, 0, 0);
-	closePipes(pa, 0, 1);
+	closeAllPipes(pa);
 
 	fflush(stdout);
 }
@@ -131,8 +148,15 @@ void changeDirectory(input *in) {
 
 /*handles sigint*/
 void handler(int signum) {
-	int i;
-
-	for (i = 0; i < processes; i++)
-		waitpid(-1, NULL, 0);
+	int i=0;
+	while (i < processes){
+		/*Wait only updates on child termination*/
+		if(wait(NULL) == -1){
+			/*This only occurs if there are no more children running*/
+			perror("wait");
+			break;
+		}
+		i++;
+	}
+	fflush(stdout);
 }
