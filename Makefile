@@ -44,7 +44,7 @@ scpm :
 	scp *.c $(UNIX4):~/cpe357/hw6
 
 handin : 
-	handin getaylor-grader 357hw6-11 Makefile *.c parseline.h README
+	handin getaylor-grader 357hw6-11 Makefile *.c *.h README.md
 
 clean :
 	rm *.o $(NAME)
