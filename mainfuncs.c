@@ -4,7 +4,7 @@
 
 /*initializes a pipeArr*/
 void initPipeArr(pipeArr *pa) {
-	memset(pa, sizeof(*pa), 0);
+	memset(pa, 0, sizeof(*pa));
 }
 
 /*opens all possible pipes*/
