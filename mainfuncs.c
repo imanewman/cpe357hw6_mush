@@ -113,6 +113,7 @@ void changeDirectory(input *in) {
 void handler(int signum) {
 	while (processes){
 		/*Wait only updates on child termination*/
+		/*Not using waitOnChildren because we no longer care about exit statuses*/
 		if(wait(NULL) == -1){
 			/*This only occurs if there are no more children running*/
 			perror("wait");
@@ -157,7 +158,7 @@ int updateRunningStatus(int pid, fileSet *fs) {
 	return 1; /*Could not find the child*/
 }
 
-/*waits on the children*/
+/*waits on the children, kills other children of one exits abnormally*/
 /*NOTE: processes can and will be changed after this*/
 void waitOnChildren(fileSet *fs){
 	int childStatus, exitedPid;
