@@ -13,7 +13,12 @@
 #define RD_END 0
 #define WR_END 1
 
+/*Used in error handling for starting and stopping children*/
+#define RUNNING 1
+#define STOPPED 0
+
 static int processes = 0;
+struct sigaction old_sa;
 
 /********************* Structures *********************/
 
@@ -27,7 +32,7 @@ typedef struct cmdFile {
 	short outStage; /*-1 if not set*/
 	char *inName; /*NULL if not set*/
 	char *outName; /*NULL if not set*/
-	short running;
+	short running; /*0 if uninitialized/exited, 1 if running*/
 } cmdFile;
 
 typedef struct fileSet {
@@ -41,16 +46,7 @@ typedef struct input {
 } input;
 
 typedef struct pipeArr {
-	int *pipes[9];
-	int pipe_0[2];
-	int pipe_1[2];
-	int pipe_2[2];
-	int pipe_3[2];
-	int pipe_4[2];
-	int pipe_5[2];
-	int pipe_6[2];
-	int pipe_7[2];
-	int pipe_8[2];
+	int pipes[9][2];
 } pipeArr;
 
 
@@ -104,9 +100,8 @@ void initPipeArr(pipeArr *pa);
 /*opens all possible pipes*/
 void openPipes(pipeArr *pa);
 
-/*closes unused pipes based on stage
-  if end is 1, closes pipes used by that stage*/
-void closePipes(pipeArr *pa, int stage, int end);
+/*closes all the pipes*/
+void closeAllPipes(pipeArr *pa);
 
 /********************* main functions *********************/
 
@@ -124,7 +119,9 @@ void handler(int signum);
 /********************* Error Handling *********************/
 
 /*kills children*/
-void killChildren(fileSet fs);
+void killChildren(fileSet *fs);
 
-/*sets the status of a given child*/
-int setChildRunStatus(int pid, short status, fileSet fs);
+/*sets the status of a given child to STOPPED*/
+int updateRunningStatus(int pid, fileSet *fs);
+
+

@@ -27,9 +27,10 @@ int main(int argc, char *argv[]) {
 	/*set up sigint signal handling*/
 	memset(&sa, 0, sizeof(sa));
 	sigfillset(&sa.sa_mask);
-	sigdelset(&sa.sa_mask, SIGINT);
+	sigaddset(&sa.sa_mask, SIGINT);
+	sa.sa_flags = 0;
 	sa.sa_handler = &handler;
-	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGINT, &sa, &old_sa);
 
 	do {
 		str[MAX_CMD_LEN - 1] = '\0';

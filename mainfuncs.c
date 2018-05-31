@@ -2,49 +2,21 @@
 
 /********************* Pipes *********************/
 
-/*initializes a pipeArr object*/
+/*initializes a pipeArr*/
 void initPipeArr(pipeArr *pa) {
-	pa->pipes[0] = pa->pipe_0;
-	pa->pipes[1] = pa->pipe_1;
-	pa->pipes[2] = pa->pipe_2;
-	pa->pipes[3] = pa->pipe_3;
-	pa->pipes[4] = pa->pipe_4;
-	pa->pipes[5] = pa->pipe_5;
-	pa->pipes[6] = pa->pipe_6;
-	pa->pipes[7] = pa->pipe_7;
-	pa->pipes[8] = pa->pipe_8;
+	memset(pa, sizeof(*pa), 0);
 }
 
 /*opens all possible pipes*/
 void openPipes(pipeArr *pa) {
 	int i;
-
 	for (i = 0; i < MAX_CMD_PIPES - 1; i++) {
 		if (pipe(pa->pipes[i]) < 0)
 			fprintf(stderr, "pipe %d creation error\n", i);
 	}
 }
 
-/*closes unused pipes based on stage
-  if end is 1, closes pipes used by that stage*/
-void closePipes(pipeArr *pa, int stage, int end) {
-	int i, max = MAX_CMD_PIPES - 2;
-
-	if ((!end && stage != 0) || (end && stage == 0))
-		close(pa->pipes[0][WR_END]);
-
-	for (i = 1; i < max; i++) {
-		if ((!end && stage != i) || (end && stage == i))  {
-			close(pa->pipes[i - 1][RD_END]);
-			close(pa->pipes[i][WR_END]);
-		}
-	}
-
-	if ((!end && stage != max) || (end && stage == max))
-		close(pa->pipes[max - 1][RD_END]);
-}
-
-/*simply close all the pipes*/
+/*close all the pipes*/
 void closeAllPipes(pipeArr *pa){
 	int i, max = MAX_CMD_PIPES - 2;
 	for(i=0; i < max; i++){
@@ -99,41 +71,48 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			}
 
 			closeAllPipes(pa);
-			
+			sigaction(SIGINT, &old_sa, NULL); /*Restore interrupts for the child*/
 			/*exec if no errors thus far*/
 			if (!(error)) {
-				cf->running = 1; /*Make a note that program started*/
+				cf->running = RUNNING; /*Make a note that program started*/
 				execvp(cf->name, cf->args);
 			}
 
-			cf->runnng = 0; /*Note that program ended*/
-			error = 1;
-			fprintf(stderr, "%s: cant exec \n", cf->name);
-			exit(1);
-		} else { /*in parent*/
-			processes++;
-		}
-	}
+			cf->running = STOPPED; /*Note that program ended*/
 
-	if (error) {
-		killChildren(fs);
-	} else {
-		for (i = 0; i < processes; i++){
-			exitedPid = wait(&childStatus);
-			if(WIFEXITED(childStatus)){
-				/*Check if child exited normally*/
-				if(!WEXITSTATUS(childStatus)) {
-					fprintf(stderr, "%s\n", ); //TODO choose what to say
-					setChildRunStatus(exitedPid, 0, fs);
-				} 
-				/*If there was an error, kill all the running processes*/
-				else 
-					killChildren(fs);
-			}
+			error = 1;
+			perror(cf->name);
+			exit(1);
+		} else {
+			processes = processes + 1;
 		}
 	}
 
 	closeAllPipes(pa);
+
+	if (error) {
+		killChildren(fs);
+	} else {
+		while (processes){
+			if((exitedPid = wait(&childStatus)) != -1 && WIFEXITED(childStatus)){
+				if(WEXITSTATUS(childStatus) == 0) { 
+					/*If child exited normally*/
+					updateRunningStatus(exitedPid, fs);
+					processes --;
+				} 
+				else{
+					/*If there was an error, kill all the running processes*/
+					killChildren(fs);
+					processes = 0;
+				}
+			} 
+			else {
+				/* If the child exited in some other way */
+				killChildren(fs);
+				processes = 0;
+			}
+		}
+	}
 
 	fflush(stdout);
 }
@@ -142,7 +121,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 void changeDirectory(input *in) {
 	if (in->words[1]) {
 		if (chdir(in->words[1]) < 0)
-			fprintf(stderr, "%s: cant change to directory\n", in->words[1]);
+			perror(in->words[1]);
 	} else {
 		perror("missing directory name\n");
 	}
@@ -153,15 +132,14 @@ void changeDirectory(input *in) {
 /*handles sigint*/
 /*TODO make waiting a generic function that can take an action*/
 void handler(int signum) {
-	int i=0;
-	while (i < processes){
+	while (processes){
 		/*Wait only updates on child termination*/
 		if(wait(NULL) == -1){
 			/*This only occurs if there are no more children running*/
 			perror("wait");
 			break;
 		}
-		i++;
+		processes --;
 	}
 	fflush(stdout);
 }
@@ -170,7 +148,7 @@ void handler(int signum) {
 /********************* Error Handling *********************/
 
 /*kills all running children*/
-void killChildren(fileSet fs) {
+void killChildren(fileSet *fs) {
 	int i;
 	cmdFile *cf;
 	for(i=0; i < fs->size;i++) {
@@ -180,14 +158,20 @@ void killChildren(fileSet fs) {
 	}
 }
 
-/*sets a childs running status*/
-int setChildRunStatus(int pid, short status, fileSet fs) {
+
+/********************* Child Handling *********************/
+
+/*The following is only needed so we do not try to kill children that
+never started running or were aborted.*/
+
+/*sets a childs running status to STOPPED and decrements process count*/
+int updateRunningStatus(int pid, fileSet *fs) {
 	int i;
 	cmdFile *cf;
 	for(i=0; i < fs->size;i++) {
 		cf = fs->files + i;
 		if(pid == cf->pid){
-			cf->running=status;
+			cf->running=STOPPED;
 			return 0;
 		}	
 	}
