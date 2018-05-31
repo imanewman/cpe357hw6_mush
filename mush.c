@@ -14,11 +14,11 @@ int main(int argc, char *argv[]) {
 		infile = stdin;
 	else if (argc == 2) {
 		if (!(infile = fopen(argv[1], "r"))) {
-			perror("invalid in file\n");
+			perror(argv[1]);
 			return 1;
 		}
 	} else {
-		perror("usage: mush [file]\n");
+		fprintf(stderr, "usage: mush [file]\n");
 		return 1;
 	}
 
@@ -35,27 +35,28 @@ int main(int argc, char *argv[]) {
 	do {
 		str[MAX_CMD_LEN - 1] = '\0';
 
-		printf("8-P ");
+		/*Only act as a console when directly typing*/
+		if(infile == stdin)
+			printf("8-P ");
 		
 		if (!(fgets(str, MAX_CMD_LEN, stdin))) { /*check if EOF reached*/
 			repeat = 0;
 		} else {
 			if (str[MAX_CMD_LEN - 1] != '\0') { /*check if cmd was to long*/
-				perror("command too long\n");
+				fprintf(stderr, "command too long\n");
 				return 1;
 			}
 
 			in = initInput(str);
 
-			if (strcmp("cd", in->words[0])) { /*make pipes if not cd*/
+			if (strcmp("cd", in->words[0])) { /*if command is not 'cd'*/
 				if ((fs = parseInput(in))) {
 					execProcesses(fs, &pa);
 
 					clearFileSet(fs);
 				}
-			} else { /*else cd to given dir*/
+			} else  /*else, cd to given dir*/
 				changeDirectory(in);
-			}
 
 			clearInput(in);
 			processes = 0;

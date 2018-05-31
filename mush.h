@@ -32,7 +32,7 @@ typedef struct cmdFile {
 	short outStage; /*-1 if not set*/
 	char *inName; /*NULL if not set*/
 	char *outName; /*NULL if not set*/
-	short running; /*0 if uninitialized/exited, 1 if running*/
+	short running; /*1 if running, 0 otherwise*/
 } cmdFile;
 
 typedef struct fileSet {
@@ -46,7 +46,7 @@ typedef struct input {
 } input;
 
 typedef struct pipeArr {
-	int pipes[9][2];
+	int pipes[MAX_CMD_PIPES-1][2];
 } pipeArr;
 
 
@@ -121,7 +121,11 @@ void handler(int signum);
 /*kills children*/
 void killChildren(fileSet *fs);
 
+/********************* Child Handling *********************/
+
 /*sets the status of a given child to STOPPED*/
 int updateRunningStatus(int pid, fileSet *fs);
 
+/*waits on all running children to finish and updates processes*/
+void waitOnChildren(fileSet *fs);
 
