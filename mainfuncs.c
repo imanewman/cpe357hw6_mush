@@ -57,13 +57,10 @@ void closeAllPipes(pipeArr *pa){
 
 /*forks and executes the given pipeline of processes*/
 void execProcesses(fileSet *fs, pipeArr *pa) {
-	int i, fdin, fdout, childStatus;
+	int i, fdin, fdout, childStatus, exitedPid;
 	int error = 0; /*set to 1 if theres a probem and running processes need to be killed*/
 	cmdFile *cf;
 	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
-
-	//Need to keep track of child pids to be able to kill them
-	int pids[MAX_CHILDREN];
 
 	openPipes(pa);
 
@@ -71,9 +68,6 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 		cf = fs->files + i;
 
 		if (!(cf->pid = fork())) { /*in child*/
-			/*closePipes(pa, i, 0);*/ /*close unneeded pipes*/
-												/*avoid for now*/
-
 			/*set up file input*/
 			if (cf->inStage != -1)
 				dup2(pa->pipes[i - 1][RD_END], STDIN_FILENO);
@@ -90,7 +84,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			}
 
 			/*set up file output*/
-			if (cf->outStage != -1) 
+			if (cf->outStage != -1)
 				dup2(pa->pipes[i][WR_END], STDOUT_FILENO);
 			else if (cf->outName) {
 				if ((fdout = open(cf->outName, O_WRONLY | O_CREAT | O_TRUNC, mode)) < 0) {
@@ -105,10 +99,14 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 			}
 
 			closeAllPipes(pa);
-
-			if (!(error)) /*exec if no errors thus far*/
+			
+			/*exec if no errors thus far*/
+			if (!(error)) {
+				cf->running = 1; /*Make a note that program started*/
 				execvp(cf->name, cf->args);
+			}
 
+			cf->runnng = 0; /*Note that program ended*/
 			error = 1;
 			fprintf(stderr, "%s: cant exec \n", cf->name);
 			exit(1);
@@ -118,13 +116,19 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	}
 
 	if (error) {
-		/*TODO: kill each aready running process if necessary*/
+		killChildren(fs);
 	} else {
 		for (i = 0; i < processes; i++){
-			childStatus = wait(NULL);
+			exitedPid = wait(&childStatus);
 			if(WIFEXITED(childStatus)){
 				/*Check if child exited normally*/
-				/*If there was an error, kill the others*/
+				if(!WEXITSTATUS(childStatus)) {
+					fprintf(stderr, "%s\n", ); //TODO choose what to say
+					setChildRunStatus(exitedPid, 0, fs);
+				} 
+				/*If there was an error, kill all the running processes*/
+				else 
+					killChildren(fs);
 			}
 		}
 	}
@@ -147,6 +151,7 @@ void changeDirectory(input *in) {
 /********************* Signal Handling *********************/
 
 /*handles sigint*/
+/*TODO make waiting a generic function that can take an action*/
 void handler(int signum) {
 	int i=0;
 	while (i < processes){
@@ -159,4 +164,32 @@ void handler(int signum) {
 		i++;
 	}
 	fflush(stdout);
+}
+
+
+/********************* Error Handling *********************/
+
+/*kills all running children*/
+void killChildren(fileSet fs) {
+	int i;
+	cmdFile *cf;
+	for(i=0; i < fs->size;i++) {
+		cf = fs->files + i;
+		if(cf->running)
+			kill(cf->pid, SIGKILL);
+	}
+}
+
+/*sets a childs running status*/
+int setChildRunStatus(int pid, short status, fileSet fs) {
+	int i;
+	cmdFile *cf;
+	for(i=0; i < fs->size;i++) {
+		cf = fs->files + i;
+		if(pid == cf->pid){
+			cf->running=status;
+			return 0;
+		}	
+	}
+	return 1; /*Could not find the child*/
 }

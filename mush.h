@@ -27,6 +27,7 @@ typedef struct cmdFile {
 	short outStage; /*-1 if not set*/
 	char *inName; /*NULL if not set*/
 	char *outName; /*NULL if not set*/
+	short running;
 } cmdFile;
 
 typedef struct fileSet {
@@ -51,6 +52,7 @@ typedef struct pipeArr {
 	int pipe_7[2];
 	int pipe_8[2];
 } pipeArr;
+
 
 /*******************************************************/
 /********************* Parse Funcs *********************/
@@ -122,4 +124,7 @@ void handler(int signum);
 /********************* Error Handling *********************/
 
 /*kills children*/
-int killChildren(int *pids);
+void killChildren(fileSet fs);
+
+/*sets the status of a given child*/
+int setChildRunStatus(int pid, short status, fileSet fs);
