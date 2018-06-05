@@ -36,10 +36,10 @@ int main(int argc, char *argv[]) {
 		str[MAX_CMD_LEN - 1] = '\0';
 
 		/*Only act as a console when directly typing*/
-		if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO))
+		if(isatty(fileno(infile)) && isatty(STDOUT_FILENO))
 			printf("8-P ");
 		errno = 0;
-		if (!(fgets(str, MAX_CMD_LEN, stdin))) { /*check if EOF reached*/
+		if (!(fgets(str, MAX_CMD_LEN, infile))) { /*check if EOF reached*/
 			if(errno != EINTR)
 				repeat = 0;
 		} else {
