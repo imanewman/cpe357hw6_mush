@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	/*set up sigint signal handling*/
 	memset(&sa, 0, sizeof(sa));
 	sigfillset(&sa.sa_mask);
-	sigaddset(&sa.sa_mask, SIGINT);
+	sigdelset(&sa.sa_mask, SIGINT);
 	sa.sa_flags = 0;
 	sa.sa_handler = &handler;
 	sigaction(SIGINT, &sa, &old_sa);
@@ -36,18 +36,22 @@ int main(int argc, char *argv[]) {
 		str[MAX_CMD_LEN - 1] = '\0';
 
 		/*Only act as a console when directly typing*/
-		if(infile == stdin)
+		if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO))
 			printf("8-P ");
-		
+		errno = 0;
 		if (!(fgets(str, MAX_CMD_LEN, stdin))) { /*check if EOF reached*/
-			repeat = 0;
+			if(errno != EINTR)
+				repeat = 0;
 		} else {
 			if (str[MAX_CMD_LEN - 1] != '\0') { /*check if cmd was to long*/
 				fprintf(stderr, "command too long\n");
 				return 1;
 			}
 
-			in = initInput(str);
+			if(strlen(str) > 1)
+				in = initInput(str);
+			else
+				continue;
 
 			if (strcmp("cd", in->words[0])) { /*if command is not 'cd'*/
 				if ((fs = parseInput(in))) {

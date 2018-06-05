@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #define MAX_CMD_LEN 512 /*max command line length*/
 #define MAX_CMD_PIPES 10 /*max commands in a pipeline*/

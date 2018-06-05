@@ -121,6 +121,7 @@ void handler(int signum) {
 		}
 		processes --;
 	}
+	printf("\n");
 	fflush(stdout);
 }
 
