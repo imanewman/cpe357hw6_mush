@@ -4,9 +4,7 @@
 
 /*initializes the input string, setting spaces to null*/
 /*adds pointers to the word array for each word*/
-input *initInput(char *str) {
-	input *in = (input *)malloc(sizeof(input));
-
+void initInput(char *str, input *in) {
 	in->size = 0;
 
 	/*set a pointer to each word, while setting all spaces and \n to null*/
@@ -21,8 +19,6 @@ input *initInput(char *str) {
 	}
 
 	in->size--; /*decrement for last null pointer*/
-
-	return in;
 }
 
 /*checks for any errors in the input string*/
@@ -39,14 +35,14 @@ int inputErrorCheck(input *in) {
 		if (cmdargs == 0) { /*if new cmd*/
 			/*check if first arg is missing*/
 			if (in->words[i][0] == '|' || in->words[i][0] == '<' || in->words[i][0] == '>') {
-				fprintf(stderr, "invalid null command\n"); 
+				fprintf(stderr, "Invalid null command.\n"); 
 				return 1;
 			} else {
 				curCmd = in->words[i];
 				cmdargs++;
 
 				if (++pipelen > MAX_CMD_PIPES) { /*check if pipe too long*/
-					fprintf(stderr, "pipeline too deep\n");
+					fprintf(stderr, "Pipeline too deep.\n");
 					return 1;
 				}
 			}
@@ -54,7 +50,7 @@ int inputErrorCheck(input *in) {
 			switch (in->words[i][0]) {
 				case '|': 
 					if (outset == 2) { /*if out already set*/
-						fprintf(stderr, "%s: ambiguous output\n", curCmd);
+						fprintf(stderr, "%s: Ambiguous output.\n", curCmd);
 						return 1;
 					} else { /*reset cmdargs if new cmd coming*/
 						cmdargs = 0;
@@ -64,36 +60,36 @@ int inputErrorCheck(input *in) {
 					break;
 				case '<':
 					if (inset == 1) { /*if in already set by pipe*/
-						fprintf(stderr, "%s: ambiguous input\n", curCmd);
+						fprintf(stderr, "%s: Ambiguous input\n", curCmd);
 						return 1;
 					} else if (inset == 2) { /*if in already set by redir*/
-						fprintf(stderr, "%s: bad input redirection\n", curCmd);
+						fprintf(stderr, "%s: Bad input redirection.\n", curCmd);
 						return 1;
 					} else { /*if not already set*/
 						inset = 2;
 						if (in->words[i+1][0] == '|' || in->words[i+1][0] == '<' /* if name is missing*/
 							|| in->words[i+1][0] == '>' || in->words[i+1][0] == '\0') {
-							fprintf(stderr, "%s: bad input redirection\n", curCmd);
+							fprintf(stderr, "%s: Bad input redirection.\n", curCmd);
 							return 1;
 						}
 					}
 					break;
 				case '>': 
 					if (outset == 2) { /*if out already set by redir*/
-						fprintf(stderr, "%s: bad output redirection\n", curCmd);
+						fprintf(stderr, "%s: Bad input redirection.\n", curCmd);
 						return 1;
 					} else { /*if not already set*/
 						outset = 2;
 						if (in->words[i+1][0] == '|' || in->words[i+1][0] == '<' /* if name is missing*/
 							|| in->words[i+1][0] == '>' || in->words[i+1][0] == '\0') {
-							fprintf(stderr, "%s: bad output redirection\n", curCmd);
+							fprintf(stderr, "%s: Bad input redirection.\n", curCmd);
 							return 1;
 						}
 					}
 					break;
 				default:
 					if (++cmdargs > MAX_CMD_ARGS) { /*check if args too long*/
-						fprintf(stderr, "%s: too many arguments\n", curCmd);
+						fprintf(stderr, "%s: Too many arguments.\n", curCmd);
 						return 1;
 					}
 			}
@@ -106,29 +102,13 @@ int inputErrorCheck(input *in) {
 
 /*clears the input struct data*/
 void clearInput(input *in) {
-	int i;
-
-	for (i = 0; i < in->size; i++) 
-		in->words[i] = NULL;
-
-	in->size = 0;
+	memset(in, 0, sizeof(input));
 }
 
 /********************* FileSet *********************/
 
-/*initializes and returns a pointer to the fileset*/
-/*initializes all cmdFiles within*/
-fileSet *initFileSet() {
-	fileSet *fs = (fileSet *)malloc(sizeof(fileSet));
-
-	clearFileSet(fs);
-
-	return fs;
-}
-
 /*makes the fileset based on the in string*/
-fileSet *makeFileSet(input *in) {
-	fileSet *fs = initFileSet();
+void makeFileSet(input *in, fileSet *fs) {
 	int i;
 	int curCmd = 0;
 	cmdFile *cf = NULL;
@@ -159,16 +139,12 @@ fileSet *makeFileSet(input *in) {
 				cf->args[cf->argc++] = in->words[i];
 		}
 	}
-
-	return fs;
 }
 
 /*clears the fileset data*/
 void clearFileSet(fileSet *fs) {
 	int i;
-
 	fs->size = 0;
-
 	for (i = 0; i < MAX_CMD_PIPES; i++) {
 		initCmdFile(fs->files + i);
 	}
@@ -176,29 +152,22 @@ void clearFileSet(fileSet *fs) {
 
 /*checks for errors in input, and returns fileset pointer
   returns null if errors*/
-fileSet *parseInput(input *in) {
+int parseInput(input *in, fileSet *fs) {
 	if ((inputErrorCheck(in)))
-		return NULL;
-	else	
-		return makeFileSet(in);
+		return 1;
+
+	makeFileSet(in, fs);
+	return 0;
 }
 
 /********************* CmdFile *********************/
 
-/*inits a cmdFile to base values*/
+/*inits a cmdFile to base values, where stage numbers are 
+equal to -1 and everything else is empty*/
 void initCmdFile(cmdFile *cf) {
-	int i;
+	memset(cf, 0, sizeof(cmdFile));
 
-	cf->name = NULL;
 	cf->stage = -1;
-	cf->pid = 0;
-	cf->argc = 0;
-
-	for (i = 0; i < MAX_CMD_ARGS; i++)
-		cf->args[i] = NULL;
-
 	cf->inStage = -1;
 	cf->outStage = -1;
-	cf->inName = NULL;
-	cf->outName = NULL;
 }

@@ -2,8 +2,8 @@
 
 int main(int argc, char *argv[]) {
 	char str[MAX_CMD_LEN];
-	fileSet *fs = NULL;
-	input *in = NULL;
+	fileSet fs;
+	input in;
 	FILE *infile = NULL;
 	pipeArr pa;
 	int repeat = 1;
@@ -22,7 +22,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	/*Setting up structs and varibles for use*/
 	initPipeArr(&pa);
+	clearFileSet(&fs);
+	clearInput(&in);
+	processes = 0;
 
 	/*set up sigint signal handling*/
 	memset(&sa, 0, sizeof(sa));
@@ -40,8 +44,9 @@ int main(int argc, char *argv[]) {
 			printf("8-P ");
 		errno = 0;
 		if (!(fgets(str, MAX_CMD_LEN, infile))) { /*check if EOF reached*/
-			if(errno != EINTR)
+			if(errno != EINTR){
 				repeat = 0;
+			}
 		} else {
 			if (str[MAX_CMD_LEN - 1] != '\0') { /*check if cmd was to long*/
 				fprintf(stderr, "command too long\n");
@@ -49,26 +54,21 @@ int main(int argc, char *argv[]) {
 			}
 
 			if(strlen(str) > 1)
-				in = initInput(str);
+				initInput(str, &in);
 			else
 				continue;
 
-			if (strcmp("cd", in->words[0])) { /*if command is not 'cd'*/
-				if ((fs = parseInput(in))) {
-					execProcesses(fs, &pa);
-
-					clearFileSet(fs);
-				}
+			if (strcmp("cd", in.words[0])) { /*if command is not 'cd'*/
+				if (parseInput(&in, &fs) == 0) /*If there were no errors, exec*/
+					execProcesses(&fs, &pa);
+				clearFileSet(&fs);	/*In either case, clear the fileSet*/
 			} else  /*else, cd to given dir*/
-				changeDirectory(in);
+				changeDirectory(&in);
 
-			clearInput(in);
 			processes = 0;
 		}
 	} while (repeat);
 
-	free(fs);
-	free(in);
 	fclose(infile);
 
 	return 0;

@@ -32,7 +32,7 @@ void execProcesses(fileSet *fs, pipeArr *pa) {
 	int i, fdin, fdout;
 	int error = 0; /*set to 1 if theres a probem and running processes need to be killed*/
 	cmdFile *cf;
-	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+	mode_t mode = S_IWUSR | S_IRUSR;
 
 	openPipes(pa);
 

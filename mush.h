@@ -18,7 +18,7 @@
 #define RUNNING 1
 #define STOPPED 0
 
-static int processes = 0;
+int processes;
 struct sigaction old_sa;
 
 /********************* Structures *********************/
@@ -57,9 +57,9 @@ typedef struct pipeArr {
 
 /********************* Input *********************/
 
-/*initializes the input string, setting spaces to null
-  adds pointers to the word array for each word*/
-input *initInput(char *str);
+/*initializes the given input based on a string, setting 
+spaces to null adds pointers to the word array for each word*/
+void initInput(char *str, input *in);
 
 /*checks for any errors in the input string
   returns 0 if none, 1 if errors*/
@@ -70,19 +70,15 @@ void clearInput(input *in);
 
 /********************* FileSet *********************/
 
-/*initializes and returns a pointer to the fileset
-  initializes all cmdFiles within*/
-fileSet *initFileSet();
-
 /*makes the fileset based on the in string*/
-fileSet *makeFileSet(input *in);
+void makeFileSet(input *in, fileSet *fs);
 
 /*clears the fileset data*/
 void clearFileSet(fileSet *fs);
 
 /*checks for errors in input, and returns fileset pointer
   returns null if errors*/
-fileSet *parseInput(input *in);
+int parseInput(input *in, fileSet *fs);
 
 /********************* CmdFile *********************/
 
