@@ -76,8 +76,8 @@ void makeFileSet(input *in, fileSet *fs);
 /*clears the fileset data*/
 void clearFileSet(fileSet *fs);
 
-/*checks for errors in input, and returns fileset pointer
-  returns null if errors*/
+/*checks for errors in input
+	returns 0 if none, 1 if errors*/
 int parseInput(input *in, fileSet *fs);
 
 /********************* CmdFile *********************/
