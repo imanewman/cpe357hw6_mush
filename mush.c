@@ -55,8 +55,10 @@ int main(int argc, char *argv[]) {
 
 			if(strlen(str) > 1)
 				initInput(str, &in);
-			else
+			else{
+				fflush(stdout);
 				continue;
+			}
 
 			if (strcmp("cd", in.words[0])) { /*if command is not 'cd'*/
 				if (parseInput(&in, &fs) == 0) /*If there were no errors, exec*/
